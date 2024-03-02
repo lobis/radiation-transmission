@@ -24,32 +24,33 @@ public:
 
 private:
     std::mutex inputMutex;
-    std::string inputParticleName;
-    TFile *inputFile = nullptr;
-    TH1F *inputHistEnergy = nullptr;
-    TH1F *inputHistTheta = nullptr;
-    TH2F *inputHistEnergyTheta = nullptr;
-
     std::mutex outputMutex;
-    TFile *outputFile = nullptr;
 
-    TH1F *muonsKe = nullptr;
-    TH1F *electronsKe = nullptr;
-    TH1F *gammasKe = nullptr;
-    TH1F *protonsKe = nullptr;
-    TH1F *neutronsKe = nullptr;
+    static std::string inputParticleName;
+    static TFile *inputFile;
+    static TFile *outputFile;
 
-    TH1F *muonsTheta = nullptr;
-    TH1F *electronsTheta = nullptr;
-    TH1F *gammasTheta = nullptr;
-    TH1F *protonsTheta = nullptr;
-    TH1F *neutronsTheta = nullptr;
+    static TH1F *inputHistEnergy;
+    static TH1F *inputHistTheta;
+    static TH2F *inputHistEnergyTheta;
 
-    TH2F *muonsKeTheta = nullptr;
-    TH2F *electronsKeTheta = nullptr;
-    TH2F *gammasKeTheta = nullptr;
-    TH2F *protonsKeTheta = nullptr;
-    TH2F *neutronsKeTheta = nullptr;
+    static TH1F *muonsKe;
+    static TH1F *electronsKe;
+    static TH1F *gammasKe;
+    static TH1F *protonsKe;
+    static TH1F *neutronsKe;
+
+    static TH1F *muonsTheta;
+    static TH1F *electronsTheta;
+    static TH1F *gammasTheta;
+    static TH1F *protonsTheta;
+    static TH1F *neutronsTheta;
+
+    static TH2F *muonsKeTheta;
+    static TH2F *electronsKeTheta;
+    static TH2F *gammasKeTheta;
+    static TH2F *protonsKeTheta;
+    static TH2F *neutronsKeTheta;
 };
 
 

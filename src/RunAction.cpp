@@ -6,6 +6,32 @@
 
 using namespace std;
 
+string RunAction::inputParticleName;
+
+TFile *RunAction::inputFile = nullptr;
+TFile *RunAction::outputFile = nullptr;
+
+TH1F *RunAction::inputHistEnergy = nullptr;
+TH1F *RunAction::inputHistTheta = nullptr;
+TH2F *RunAction::inputHistEnergyTheta = nullptr;
+
+TH1F *RunAction::muonsKe = nullptr;
+TH1F *RunAction::electronsKe = nullptr;
+TH1F *RunAction::gammasKe = nullptr;
+TH1F *RunAction::protonsKe = nullptr;
+TH1F *RunAction::neutronsKe = nullptr;
+
+TH1F *RunAction::muonsTheta = nullptr;
+TH1F *RunAction::electronsTheta = nullptr;
+TH1F *RunAction::gammasTheta = nullptr;
+TH1F *RunAction::protonsTheta = nullptr;
+TH1F *RunAction::neutronsTheta = nullptr;
+
+TH2F *RunAction::muonsKeTheta = nullptr;
+TH2F *RunAction::electronsKeTheta = nullptr;
+TH2F *RunAction::gammasKeTheta = nullptr;
+TH2F *RunAction::protonsKeTheta = nullptr;
+TH2F *RunAction::neutronsKeTheta = nullptr;
 
 RunAction::RunAction() : G4UserRunAction() {}
 
@@ -16,12 +42,15 @@ void RunAction::BeginOfRunAction(const G4Run *) {
         inputFile = TFile::Open("input.root", "READ");
 
         inputParticleName = "neutron";
-        //inputHistEnergy = inputFile->Get<TH1F>(TString::Format("%sKe", inputParticleName.c_str()));
-        //inputHistTheta = inputFile->Get<TH1F>(TString::Format("%sTheta", inputParticleName.c_str()));
-        //inputHistEnergyTheta = inputFile->Get<TH2F>(TString::Format("%sKeTheta", inputParticleName.c_str()));
+
         inputHistEnergy = inputFile->Get<TH1F>(string(inputParticleName + "sKe").c_str());
         inputHistTheta = inputFile->Get<TH1F>(string(inputParticleName + "sTheta").c_str());
         inputHistEnergyTheta = inputFile->Get<TH2F>(string(inputParticleName + "sKeTheta").c_str());
+
+        // rename to avoid name conflicts
+        inputHistEnergy->SetName("inputKe");
+        inputHistTheta->SetName("inputTheta");
+        inputHistEnergyTheta->SetName("inputKeTheta");
 
         outputFile = TFile::Open("output.root", "RECREATE");
 
