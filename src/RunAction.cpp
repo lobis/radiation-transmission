@@ -76,12 +76,12 @@ void RunAction::EndOfRunAction(const G4Run *) {
     }
 
     if (isMaster) {
-        outputFile->Write();
-
         inputHistEnergy->Write("inputKe");
         inputHistTheta->Write("inputTheta");
         inputHistEnergyTheta->Write("inputKeTheta");
+        inputFile->Close();
 
+        outputFile->Write();
         outputFile->Close();
     }
 
@@ -127,7 +127,9 @@ std::pair<double, double> RunAction::GetEnergyAndTheta() {
         throw runtime_error("RunAction::GetEnergyAndTheta: input histograms not set");
     }
     double energy, theta;
-    inputHistEnergyTheta->GetRandom2(energy, theta);
+    // inputHistEnergyTheta->GetRandom2(energy, theta);
+    energy = inputHistEnergy->GetRandom();
+    theta = inputHistTheta->GetRandom();
     return {energy, theta};
 }
 

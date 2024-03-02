@@ -19,7 +19,12 @@ const string visualizationMacro = R"(
 /vis/viewer/flush
 )";
 
-int main() {
+int main(int argc, char **argv) {
+    int nEvents = 1000;
+    if (argc > 1) {
+        nEvents = stoi(argv[1]);
+    }
+
     G4RunManager runManager;
 
     runManager.SetUserInitialization(new DetectorConstruction);
@@ -36,7 +41,7 @@ int main() {
     // insert the lines from the visualizationMacro string
     // uiManager->ApplyCommand(visualizationMacro);
 
-    runManager.BeamOn(10000);
+    runManager.BeamOn(nEvents);
 
     return 0;
 }

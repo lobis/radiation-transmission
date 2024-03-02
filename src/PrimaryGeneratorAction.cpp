@@ -25,9 +25,10 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event *event) {
     gun.SetParticlePosition({0.0, 0.0, 0.0});
 
     double phi = G4UniformRand() * TMath::TwoPi();
+    double thetaRad = theta * TMath::DegToRad();
 
     gun.SetParticleMomentumDirection(
-            {TMath::Sin(theta) * TMath::Cos(phi), TMath::Sin(theta) * TMath::Sin(phi), TMath::Cos(theta)});
+            {TMath::Sin(thetaRad) * TMath::Cos(phi), TMath::Sin(thetaRad) * TMath::Sin(phi), TMath::Cos(thetaRad)});
 
     gun.GeneratePrimaryVertex(event);
 }
