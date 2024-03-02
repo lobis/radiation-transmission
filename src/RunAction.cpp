@@ -21,7 +21,6 @@ void RunAction::BeginOfRunAction(const G4Run *) {
 
         outputFile = TFile::Open("output.root", "RECREATE");
 
-
         const unsigned int binsEnergyN = 200;
         const double binsEnergyMin = 1E-9;
         const double binsEnergyMax = 1E8;
@@ -65,7 +64,8 @@ void RunAction::BeginOfRunAction(const G4Run *) {
 }
 
 void RunAction::EndOfRunAction(const G4Run *) {
-    lock_guard<std::mutex> lock(mutex);
+    lock_guard<std::mutex> lockInput(inputMutex);
+    lock_guard<std::mutex> lockOutput(outputMutex);
 
     if (!isMaster || !G4Threading::IsMultithreadedApplication()) {
         //
@@ -85,7 +85,7 @@ void RunAction::EndOfRunAction(const G4Run *) {
 }
 
 void RunAction::InsertTrack(const G4Track *track) {
-    lock_guard<std::mutex> lock(mutex);
+    lock_guard<std::mutex> lock(outputMutex);
 
     auto *particle = const_cast<G4ParticleDefinition *>(track->GetParticleDefinition());
     G4String particleName = particle->GetParticleName();
@@ -114,4 +114,15 @@ void RunAction::InsertTrack(const G4Track *track) {
         neutronsTheta->Fill(theta);
         neutronsKeTheta->Fill(kineticEnergy, theta);
     }
+}
+
+std::pair<double, double> RunAction::GetEnergyAndTheta() {
+    lock_guard<std::mutex> lock(inputMutex);
+
+    if (!inputHistEnergy || !inputHistTheta || !inputHistEnergyTheta) {
+        throw runtime_error("RunAction::GetEnergyAndTheta: input histograms not set");
+    }
+    double energy, theta;
+    inputHistEnergyTheta->GetRandom2(energy, theta);
+    return {energy, theta};
 }

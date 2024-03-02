@@ -18,13 +18,17 @@ public:
 
     void InsertTrack(const G4Track *track);
 
+    std::pair<double, double> GetEnergyAndTheta();
+
 private:
+    std::mutex inputMutex;
+    std::string inputParticleName;
     TFile *inputFile = nullptr;
     TH1F *inputHistEnergy = nullptr;
     TH1F *inputHistTheta = nullptr;
     TH2F *inputHistEnergyTheta = nullptr;
 
-    std::mutex mutex;
+    std::mutex outputMutex;
     TFile *outputFile = nullptr;
 
     TH1F *muonsKe = nullptr;
