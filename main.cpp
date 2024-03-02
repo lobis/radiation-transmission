@@ -36,7 +36,7 @@ int main() {
     // insert the lines from the visualizationMacro string
     // uiManager->ApplyCommand(visualizationMacro);
 
-    runManager.BeamOn(100);
+    runManager.BeamOn(10000);
 
     return 0;
 }

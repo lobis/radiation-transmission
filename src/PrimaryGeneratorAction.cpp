@@ -18,7 +18,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event *event) {
     const auto [energy, theta] = runAction->GetEnergyAndTheta();
 
     G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
-    G4ParticleDefinition *particle = particleTable->FindParticle("neutron");
+    G4ParticleDefinition *particle = particleTable->FindParticle(runAction->GetInputParticleName());
 
     gun.SetParticleDefinition(particle);
     gun.SetParticleEnergy(energy * MeV);

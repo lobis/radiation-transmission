@@ -20,6 +20,8 @@ public:
 
     std::pair<double, double> GetEnergyAndTheta();
 
+    std::string GetInputParticleName() const;
+
 private:
     std::mutex inputMutex;
     std::string inputParticleName;

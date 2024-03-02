@@ -15,9 +15,13 @@ void RunAction::BeginOfRunAction(const G4Run *) {
     if (IsMaster()) {
         inputFile = TFile::Open("input.root", "READ");
 
-        inputHistEnergy = inputFile->Get<TH1F>("muonsKe");
-        inputHistTheta = inputFile->Get<TH1F>("muonsTheta");
-        inputHistEnergyTheta = inputFile->Get<TH2F>("muonsKeTheta");
+        inputParticleName = "neutron";
+        //inputHistEnergy = inputFile->Get<TH1F>(TString::Format("%sKe", inputParticleName.c_str()));
+        //inputHistTheta = inputFile->Get<TH1F>(TString::Format("%sTheta", inputParticleName.c_str()));
+        //inputHistEnergyTheta = inputFile->Get<TH2F>(TString::Format("%sKeTheta", inputParticleName.c_str()));
+        inputHistEnergy = inputFile->Get<TH1F>(string(inputParticleName + "sKe").c_str());
+        inputHistTheta = inputFile->Get<TH1F>(string(inputParticleName + "sTheta").c_str());
+        inputHistEnergyTheta = inputFile->Get<TH2F>(string(inputParticleName + "sKeTheta").c_str());
 
         outputFile = TFile::Open("output.root", "RECREATE");
 
@@ -125,4 +129,20 @@ std::pair<double, double> RunAction::GetEnergyAndTheta() {
     double energy, theta;
     inputHistEnergyTheta->GetRandom2(energy, theta);
     return {energy, theta};
+}
+
+std::string RunAction::GetInputParticleName() const {
+    if (inputParticleName == "neutron") {
+        return "neutron";
+    } else if (inputParticleName == "proton") {
+        return "proton";
+    } else if (inputParticleName == "muon") {
+        return "muon";
+    } else if (inputParticleName == "electron") {
+        return "e-";
+    } else if (inputParticleName == "gamma") {
+        return "gamma";
+    } else {
+        throw runtime_error("RunAction::GetInputParticleName: unknown input particle name: " + inputParticleName);
+    }
 }
