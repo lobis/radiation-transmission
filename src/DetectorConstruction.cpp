@@ -24,7 +24,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
     const auto targetMaterial = concrete;
     constexpr double width = 300.0 * m; // infinite in x and y
 
-    constexpr double thickness = 10.0 * cm;
+    constexpr double thickness = 100.0 * cm;
     constexpr double detectorThickness = 1.0 * mm;
 
     auto worldSolid = new G4Box("World", width / 2, width / 2, width / 2);

@@ -1,5 +1,7 @@
 
+#include <G4RunManager.hh>
 #include "SensitiveDetector.h"
+#include "RunAction.h"
 
 using namespace std;
 
@@ -11,6 +13,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *step, G4TouchableHistory *) {
     auto track = step->GetTrack();
 
     // print step info
+    /*
     G4StepPoint *preStepPoint = step->GetPreStepPoint();
     auto particle = const_cast<G4ParticleDefinition *>(track->GetParticleDefinition());
     G4String particleName = particle->GetParticleName();
@@ -30,7 +33,10 @@ G4bool SensitiveDetector::ProcessHits(G4Step *step, G4TouchableHistory *) {
          << "kineticEnergy=" << kineticEnergy << " "
          << "position=" << position << " "
          << "momentum=" << momentum << endl;
+    */
 
+    auto runAction = dynamic_cast<RunAction *>(const_cast<G4UserRunAction *>(G4RunManager::GetRunManager()->GetUserRunAction()));
+    runAction->InsertTrack(track);
 
     track->SetTrackStatus(fStopAndKill);
 
