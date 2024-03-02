@@ -19,6 +19,11 @@ public:
     void InsertTrack(const G4Track *track);
 
 private:
+    TFile *inputFile = nullptr;
+    TH1F *inputHistEnergy = nullptr;
+    TH1F *inputHistTheta = nullptr;
+    TH2F *inputHistEnergyTheta = nullptr;
+
     std::mutex mutex;
     TFile *outputFile = nullptr;
 

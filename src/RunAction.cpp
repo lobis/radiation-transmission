@@ -13,6 +13,12 @@ void RunAction::BeginOfRunAction(const G4Run *) {
     lock_guard<std::mutex> lock(mutex);
 
     if (IsMaster()) {
+        inputFile = TFile::Open("input.root", "READ");
+
+        inputHistEnergy = inputFile->Get<TH1F>("muonsKe");
+        inputHistTheta = inputFile->Get<TH1F>("muonsTheta");
+        inputHistEnergyTheta = inputFile->Get<TH2F>("muonsKeTheta");
+
         outputFile = TFile::Open("output.root", "RECREATE");
 
 
@@ -67,6 +73,11 @@ void RunAction::EndOfRunAction(const G4Run *) {
 
     if (isMaster) {
         outputFile->Write();
+
+        inputHistEnergy->Write("inputKe");
+        inputHistTheta->Write("inputTheta");
+        inputHistEnergyTheta->Write("inputKeTheta");
+
         outputFile->Close();
     }
 
