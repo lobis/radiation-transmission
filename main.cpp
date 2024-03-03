@@ -1,6 +1,4 @@
 #include <G4RunManager.hh>
-#include <G4VisExecutive.hh>
-#include <G4UIExecutive.hh>
 #include <G4RunManagerFactory.hh>
 
 #include "DetectorConstruction.h"
@@ -10,9 +8,25 @@
 
 #include "CLI/CLI.hpp"
 
+#include <chrono>
+#include <iostream>
+#include <thread>
+
 using namespace std;
 
+void printProgress() {
+    const auto start = chrono::steady_clock::now();
+    do {
+        const auto elapsed = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - start).count();
+        cout << "Progress: " << RunAction::GetLaunchedPrimaries() << " / " << RunAction::GetRequestedPrimaries()
+             << " (" << 100.0 * RunAction::GetLaunchedPrimaries() / RunAction::GetRequestedPrimaries() << "%)"
+             << " Elapsed time: " << elapsed << " s" << endl;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    } while (RunAction::GetLaunchedPrimaries() < RunAction::GetRequestedPrimaries());
+}
+
 int main(int argc, char **argv) {
+    const auto timeStart = chrono::steady_clock::now();
 
     int nEvents;
     int nThreads = 0;
@@ -41,6 +55,8 @@ int main(int argc, char **argv) {
     RunAction::SetInputFilename(inputFilename);
     RunAction::SetOutputFilename(outputFilename);
 
+    RunAction::SetRequestedPrimaries(nEvents);
+
     const auto runManagerType = nThreads > 0 ? G4RunManagerType::MTOnly : G4RunManagerType::SerialOnly;
     auto runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));
 
@@ -55,10 +71,24 @@ int main(int argc, char **argv) {
 
     runManager->Initialize();
 
-    G4VisExecutive visManager;
-    visManager.Initialize();
+    std::thread t(printProgress);
+    t.detach();
 
-    runManager->BeamOn(nEvents);
+    runManager->BeamOn(RunAction::GetRequestedPrimaries());
+
+    // Attempt to open the file to check if it was written correctly
+    TFile f(outputFilename.c_str());
+    if (f.IsZombie()) {
+        cout << "Error: file " << outputFilename << " is not valid" << endl;
+        return 1;
+    } else {
+        cout << "File " << outputFilename << " written successfully" << endl;
+    }
+    f.Close();
+
+    const auto elapsed = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - timeStart).count();
+
+    cout << "Total runtime: " << elapsed << " s" << endl;
 
     return 0;
 }

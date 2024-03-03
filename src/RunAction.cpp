@@ -6,6 +6,9 @@
 
 using namespace std;
 
+int RunAction::requestedPrimaries = 0;
+unsigned int RunAction::launchedPrimaries = 0;
+
 mutex RunAction::inputMutex;
 mutex RunAction::outputMutex;
 
@@ -190,4 +193,21 @@ void RunAction::SetInputFilename(const string &name) {
 
 void RunAction::SetOutputFilename(const string &name) {
     outputFilename = name;
+}
+
+void RunAction::SetRequestedPrimaries(int newValue) {
+    RunAction::requestedPrimaries = newValue;
+}
+
+int RunAction::GetRequestedPrimaries() {
+    return RunAction::requestedPrimaries;
+}
+
+void RunAction::IncreaseLaunchedPrimaries() {
+    RunAction::launchedPrimaries++;
+}
+
+unsigned int RunAction::GetLaunchedPrimaries() {
+    lock_guard<std::mutex> lock(inputMutex);
+    return RunAction::launchedPrimaries;
 }

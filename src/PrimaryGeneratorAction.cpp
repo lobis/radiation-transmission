@@ -12,18 +12,15 @@ using namespace std;
 using namespace CLHEP;
 
 PrimaryGeneratorAction::PrimaryGeneratorAction() : G4VUserPrimaryGeneratorAction() {
-    auto runAction = dynamic_cast<RunAction *>(const_cast<G4UserRunAction *>(G4RunManager::GetRunManager()->GetUserRunAction()));
     G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
-    G4ParticleDefinition *particle = particleTable->FindParticle(runAction->GetInputParticleName());
+    G4ParticleDefinition *particle = particleTable->FindParticle(RunAction::GetInputParticleName());
 
     gun.SetParticleDefinition(particle);
     gun.SetParticlePosition({0.0, 0.0, 0.0});
 }
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event *event) {
-    auto runAction = dynamic_cast<RunAction *>(const_cast<G4UserRunAction *>(G4RunManager::GetRunManager()->GetUserRunAction()));
-
-    const auto [energy, theta] = runAction->GetEnergyAndTheta();
+    const auto [energy, theta] = RunAction::GetEnergyAndTheta();
 
     gun.SetParticleEnergy(energy * MeV);
 
@@ -34,4 +31,6 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event *event) {
             {TMath::Sin(thetaRad) * TMath::Cos(phi), TMath::Sin(thetaRad) * TMath::Sin(phi), TMath::Cos(thetaRad)});
 
     gun.GeneratePrimaryVertex(event);
+
+    RunAction::IncreaseLaunchedPrimaries();
 }
