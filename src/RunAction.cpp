@@ -50,9 +50,9 @@ void RunAction::BeginOfRunAction(const G4Run *) {
     if (IsMaster()) {
         inputFile = TFile::Open(inputFilename.c_str(), "READ");
 
-        inputHistEnergy = inputFile->Get<TH1D>(string(inputParticleName + "sKe").c_str());
-        inputHistTheta = inputFile->Get<TH1D>(string(inputParticleName + "sTheta").c_str());
-        inputHistEnergyTheta = inputFile->Get<TH2D>(string(inputParticleName + "sKeTheta").c_str());
+        inputHistEnergy = inputFile->Get<TH1D>(string(inputParticleName + "_energy").c_str());
+        inputHistTheta = inputFile->Get<TH1D>(string(inputParticleName + "_theta").c_str());
+        inputHistEnergyTheta = inputFile->Get<TH2D>(string(inputParticleName + "_energy_theta").c_str());
 
         // rename to avoid name conflicts
         inputHistEnergy->SetName("inputKe");
@@ -74,31 +74,31 @@ void RunAction::BeginOfRunAction(const G4Run *) {
         const double binsThetaMin = 0;
         const double binsThetaMax = 90;
 
-        muonsKe = new TH1D("muonsKe", "Muons Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
-        electronsKe = new TH1D("electronsKe", "Electrons Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
-        gammasKe = new TH1D("gammasKe", "Gammas Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
-        protonsKe = new TH1D("protonsKe", "Protons Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
-        neutronsKe = new TH1D("neutronsKe", "Neutrons Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
+        muonsKe = new TH1D("muon_energy", "Muon Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
+        electronsKe = new TH1D("electron_energy", "Electron Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
+        gammasKe = new TH1D("gamma_energy", "Gamma Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
+        protonsKe = new TH1D("proton_energy", "Proton Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
+        neutronsKe = new TH1D("neutron_energy", "Neutron Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
 
-        muonsTheta = new TH1D("muonsTheta", "Muons Theta (degrees)", binsThetaN, binsThetaMin, binsThetaMax);
-        electronsTheta = new TH1D("electronsTheta", "Electrons Theta (degrees)", binsThetaN, binsThetaMin,
+        muonsTheta = new TH1D("muon_theta", "Muon Theta (degrees)", binsThetaN, binsThetaMin, binsThetaMax);
+        electronsTheta = new TH1D("electron_theta", "Electron Theta (degrees)", binsThetaN, binsThetaMin,
                                   binsThetaMax);
-        gammasTheta = new TH1D("gammasTheta", "Gammas Theta (degrees)", binsThetaN, binsThetaMin, binsThetaMax);
-        protonsTheta = new TH1D("protonsTheta", "Protons Theta (degrees)", binsThetaN, binsThetaMin, binsThetaMax);
-        neutronsTheta = new TH1D("neutronsTheta", "Neutrons Theta (degrees)", binsThetaN, binsThetaMin, binsThetaMax);
+        gammasTheta = new TH1D("gamma_theta", "Gamma Theta (degrees)", binsThetaN, binsThetaMin, binsThetaMax);
+        protonsTheta = new TH1D("proton_theta", "Proton Theta (degrees)", binsThetaN, binsThetaMin, binsThetaMax);
+        neutronsTheta = new TH1D("neutron_theta", "Neutron Theta (degrees)", binsThetaN, binsThetaMin, binsThetaMax);
 
-        muonsKeTheta = new TH2D("muonsKeTheta", "Muons Kinetic Energy (MeV) vs Theta (degrees)", binsEnergyN,
+        muonsKeTheta = new TH2D("muon_energy_theta", "Muon Kinetic Energy (MeV) vs Theta (degrees)", binsEnergyN,
                                 binsEnergy,
                                 binsThetaN, binsThetaMin, binsThetaMax);
-        electronsKeTheta = new TH2D("electronsKeTheta", "Electrons Kinetic Energy (MeV) vs Theta (degrees)",
+        electronsKeTheta = new TH2D("electron_energy_theta", "Electron Kinetic Energy (MeV) vs Theta (degrees)",
                                     binsEnergyN,
                                     binsEnergy, binsThetaN, binsThetaMin, binsThetaMax);
-        gammasKeTheta = new TH2D("gammasKeTheta", "Gammas Kinetic Energy (MeV) vs Theta (degrees)", binsEnergyN,
+        gammasKeTheta = new TH2D("gamma_energy_theta", "Gamma Kinetic Energy (MeV) vs Theta (degrees)", binsEnergyN,
                                  binsEnergy,
                                  binsThetaN, binsThetaMin, binsThetaMax);
-        protonsKeTheta = new TH2D("protonsKeTheta", "Protons Kinetic Energy (MeV) vs Theta (degrees)", binsEnergyN,
+        protonsKeTheta = new TH2D("proton_energy_theta", "Proton Kinetic Energy (MeV) vs Theta (degrees)", binsEnergyN,
                                   binsEnergy, binsThetaN, binsThetaMin, binsThetaMax);
-        neutronsKeTheta = new TH2D("neutronsKeTheta", "Neutrons Kinetic Energy (MeV) vs Theta (degrees)", binsEnergyN,
+        neutronsKeTheta = new TH2D("neutron_energy_theta", "Neutron Kinetic Energy (MeV) vs Theta (degrees)", binsEnergyN,
                                    binsEnergy, binsThetaN, binsThetaMin, binsThetaMax);
     }
 }
