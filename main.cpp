@@ -11,6 +11,7 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
+#include <filesystem>
 
 using namespace std;
 
@@ -57,6 +58,11 @@ int main(int argc, char **argv) {
     RunAction::SetOutputFilename(outputFilename);
 
     RunAction::SetRequestedPrimaries(nEvents);
+
+    if (!filesystem::exists(inputFilename)) {
+        cerr << "Input file " << inputFilename << " does not exist" << endl;
+        return 1;
+    }
 
     const auto runManagerType = nThreads > 0 ? G4RunManagerType::MTOnly : G4RunManagerType::SerialOnly;
     auto runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));

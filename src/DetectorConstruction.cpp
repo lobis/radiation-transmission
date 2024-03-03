@@ -26,8 +26,8 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
         if (nist->FindOrBuildMaterial(material) == nullptr) {
             throw runtime_error("Material " + material + " not found");
         }
-        if (thickness <= 0) {
-            throw runtime_error("Thickness must be positive");
+        if (thickness < 0) {
+            throw runtime_error("Thickness cannot be negative");
         }
     }
 
@@ -44,6 +44,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
         const auto &config = configuration[i];
         const auto material = nist->FindOrBuildMaterial(config.first);
         const auto thickness = config.second * mm;
+        cout << "Layer " << i << " is " << thickness << " mm of " << material->GetName() << endl;
+        if (thickness == 0) {
+            cout << "Warning: Layer " << i << " has zero thickness, skipping it" << endl;
+            continue;
+        }
         auto solid = new G4Box("Layer" + to_string(i), width / 2, width / 2, thickness / 2);
         auto logical = new G4LogicalVolume(solid, material, "Layer" + to_string(i));
         new G4PVPlacement(nullptr, {0, 0, totalThickness + thickness / 2}, logical, "Layer" + to_string(i),
