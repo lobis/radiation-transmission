@@ -175,7 +175,7 @@ std::string RunAction::GetInputParticleName() {
     } else if (inputParticleName == "proton") {
         return "proton";
     } else if (inputParticleName == "muon") {
-        return "muon";
+        return "mu-";
     } else if (inputParticleName == "electron") {
         return "e-";
     } else if (inputParticleName == "gamma") {
