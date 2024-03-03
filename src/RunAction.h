@@ -5,8 +5,8 @@
 #include <G4UserRunAction.hh>
 
 #include <TFile.h>
-#include <TH1F.h>
-#include <TH2F.h>
+#include <TH1D.h>
+#include <TH2D.h>
 
 class RunAction : public G4UserRunAction {
 public:
@@ -50,27 +50,27 @@ private:
     static TFile *inputFile;
     static TFile *outputFile;
 
-    static TH1F *inputHistEnergy;
-    static TH1F *inputHistTheta;
-    static TH2F *inputHistEnergyTheta;
+    static TH1D *inputHistEnergy;
+    static TH1D *inputHistTheta;
+    static TH2D *inputHistEnergyTheta;
 
-    static TH1F *muonsKe;
-    static TH1F *electronsKe;
-    static TH1F *gammasKe;
-    static TH1F *protonsKe;
-    static TH1F *neutronsKe;
+    static TH1D *muonsKe;
+    static TH1D *electronsKe;
+    static TH1D *gammasKe;
+    static TH1D *protonsKe;
+    static TH1D *neutronsKe;
 
-    static TH1F *muonsTheta;
-    static TH1F *electronsTheta;
-    static TH1F *gammasTheta;
-    static TH1F *protonsTheta;
-    static TH1F *neutronsTheta;
+    static TH1D *muonsTheta;
+    static TH1D *electronsTheta;
+    static TH1D *gammasTheta;
+    static TH1D *protonsTheta;
+    static TH1D *neutronsTheta;
 
-    static TH2F *muonsKeTheta;
-    static TH2F *electronsKeTheta;
-    static TH2F *gammasKeTheta;
-    static TH2F *protonsKeTheta;
-    static TH2F *neutronsKeTheta;
+    static TH2D *muonsKeTheta;
+    static TH2D *electronsKeTheta;
+    static TH2D *gammasKeTheta;
+    static TH2D *protonsKeTheta;
+    static TH2D *neutronsKeTheta;
 };
 
 
