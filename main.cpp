@@ -39,7 +39,8 @@ int main(int argc, char **argv) {
 
     app.add_option("-n,--primaries", nEvents, "Number of primary particles to launch")->check(
             CLI::PositiveNumber)->required();
-    app.add_option("-t,--threads", nThreads, "Number of threads")->check(CLI::PositiveNumber);
+    app.add_option("-t,--threads", nThreads, "Number of threads. t=0 means no multithreading (default)")->check(
+            CLI::NonNegativeNumber);
     app.add_option("-p,--particle", inputParticle, "Input particle type")->check(
             CLI::IsMember({"neutron", "gamma", "proton", "electron", "muon"}))->required();
     app.add_option("-i,--input", inputFilename,
@@ -75,16 +76,6 @@ int main(int argc, char **argv) {
     t.detach();
 
     runManager->BeamOn(RunAction::GetRequestedPrimaries());
-
-    // Attempt to open the file to check if it was written correctly
-    TFile f(outputFilename.c_str());
-    if (f.IsZombie()) {
-        cout << "Error: file " << outputFilename << " is not valid" << endl;
-        return 1;
-    } else {
-        cout << "File " << outputFilename << " written successfully" << endl;
-    }
-    f.Close();
 
     const auto elapsed = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - timeStart).count();
 
