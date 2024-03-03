@@ -23,4 +23,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src ${ROO
 file(GLOB SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ${ROOT_LIBRARIES} ${Geant4_LIBRARIES} CLI11::CLI11)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${ROOT_LIBRARIES} ${Geant4_LIBRARIES} CLI11::CLI11 pthread)
