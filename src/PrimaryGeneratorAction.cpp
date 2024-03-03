@@ -20,15 +20,15 @@ PrimaryGeneratorAction::PrimaryGeneratorAction() : G4VUserPrimaryGeneratorAction
 }
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event *event) {
-    const auto [energy, theta] = RunAction::GetEnergyAndTheta();
+    const auto [energy, zenith] = RunAction::GetEnergyAndZenith();
 
     gun.SetParticleEnergy(energy);
 
     double phi = G4UniformRand() * TMath::TwoPi();
-    double thetaRad = theta * TMath::DegToRad();
+    double zenithRad = zenith * TMath::DegToRad();
 
-    const G4ThreeVector direction = {TMath::Sin(thetaRad) * TMath::Cos(phi), TMath::Sin(thetaRad) * TMath::Sin(phi),
-                                     TMath::Cos(thetaRad)};
+    const G4ThreeVector direction = {TMath::Sin(zenithRad) * TMath::Cos(phi), TMath::Sin(zenithRad) * TMath::Sin(phi),
+                                     TMath::Cos(zenithRad)};
 
     gun.SetParticleMomentumDirection(direction);
 

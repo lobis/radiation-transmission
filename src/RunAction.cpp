@@ -21,26 +21,26 @@ TFile *RunAction::inputFile = nullptr;
 TFile *RunAction::outputFile = nullptr;
 
 TH1D *RunAction::inputHistEnergy = nullptr;
-TH1D *RunAction::inputHistTheta = nullptr;
-TH2D *RunAction::inputHistEnergyTheta = nullptr;
+TH1D *RunAction::inputHistZenith = nullptr;
+TH2D *RunAction::inputHistEnergyZenith = nullptr;
 
-TH1D *RunAction::muonsKe = nullptr;
-TH1D *RunAction::electronsKe = nullptr;
-TH1D *RunAction::gammasKe = nullptr;
-TH1D *RunAction::protonsKe = nullptr;
-TH1D *RunAction::neutronsKe = nullptr;
+TH1D *RunAction::muonsEnergy = nullptr;
+TH1D *RunAction::electronsEnergy = nullptr;
+TH1D *RunAction::gammasEnergy = nullptr;
+TH1D *RunAction::protonsEnergy = nullptr;
+TH1D *RunAction::neutronsEnergy = nullptr;
 
-TH1D *RunAction::muonsTheta = nullptr;
-TH1D *RunAction::electronsTheta = nullptr;
-TH1D *RunAction::gammasTheta = nullptr;
-TH1D *RunAction::protonsTheta = nullptr;
-TH1D *RunAction::neutronsTheta = nullptr;
+TH1D *RunAction::muonsZenith = nullptr;
+TH1D *RunAction::electronsZenith = nullptr;
+TH1D *RunAction::gammasZenith = nullptr;
+TH1D *RunAction::protonsZenith = nullptr;
+TH1D *RunAction::neutronsZenith = nullptr;
 
-TH2D *RunAction::muonsKeTheta = nullptr;
-TH2D *RunAction::electronsKeTheta = nullptr;
-TH2D *RunAction::gammasKeTheta = nullptr;
-TH2D *RunAction::protonsKeTheta = nullptr;
-TH2D *RunAction::neutronsKeTheta = nullptr;
+TH2D *RunAction::muonsEnergyZenith = nullptr;
+TH2D *RunAction::electronsEnergyZenith = nullptr;
+TH2D *RunAction::gammasEnergyZenith = nullptr;
+TH2D *RunAction::protonsEnergyZenith = nullptr;
+TH2D *RunAction::neutronsEnergyZenith = nullptr;
 
 RunAction::RunAction() : G4UserRunAction() {}
 
@@ -51,13 +51,13 @@ void RunAction::BeginOfRunAction(const G4Run *) {
         inputFile = TFile::Open(inputFilename.c_str(), "READ");
 
         inputHistEnergy = inputFile->Get<TH1D>(string(inputParticleName + "_energy").c_str());
-        inputHistTheta = inputFile->Get<TH1D>(string(inputParticleName + "_theta").c_str());
-        inputHistEnergyTheta = inputFile->Get<TH2D>(string(inputParticleName + "_energy_theta").c_str());
+        inputHistZenith = inputFile->Get<TH1D>(string(inputParticleName + "_zenith").c_str());
+        inputHistEnergyZenith = inputFile->Get<TH2D>(string(inputParticleName + "_energy_zenith").c_str());
 
         // rename to avoid name conflicts
-        inputHistEnergy->SetName("inputKe");
-        inputHistTheta->SetName("inputTheta");
-        inputHistEnergyTheta->SetName("inputKeTheta");
+        inputHistEnergy->SetName("inputEnergy");
+        inputHistZenith->SetName("inputZenith");
+        inputHistEnergyZenith->SetName("inputEnergyZenith");
 
         outputFile = TFile::Open(outputFilename.c_str(), "RECREATE");
 
@@ -70,36 +70,44 @@ void RunAction::BeginOfRunAction(const G4Run *) {
                                               i * (TMath::Log10(binsEnergyMax) - TMath::Log10(binsEnergyMin)) /
                                               binsEnergyN));
         }
-        const unsigned int binsThetaN = 200;
-        const double binsThetaMin = 0;
-        const double binsThetaMax = 90;
+        const unsigned int binsZenithN = 200;
+        const double binsZenithMin = 0;
+        const double binsZenithMax = 90;
 
-        muonsKe = new TH1D("muon_energy", "Muon Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
-        electronsKe = new TH1D("electron_energy", "Electron Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
-        gammasKe = new TH1D("gamma_energy", "Gamma Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
-        protonsKe = new TH1D("proton_energy", "Proton Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
-        neutronsKe = new TH1D("neutron_energy", "Neutron Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
+        muonsEnergy = new TH1D("muon_energy", "Muon Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
+        electronsEnergy = new TH1D("electron_energy", "Electron Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
+        gammasEnergy = new TH1D("gamma_energy", "Gamma Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
+        protonsEnergy = new TH1D("proton_energy", "Proton Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
+        neutronsEnergy = new TH1D("neutron_energy", "Neutron Kinetic Energy (MeV)", binsEnergyN, binsEnergy);
 
-        muonsTheta = new TH1D("muon_theta", "Muon Theta (degrees)", binsThetaN, binsThetaMin, binsThetaMax);
-        electronsTheta = new TH1D("electron_theta", "Electron Theta (degrees)", binsThetaN, binsThetaMin,
-                                  binsThetaMax);
-        gammasTheta = new TH1D("gamma_theta", "Gamma Theta (degrees)", binsThetaN, binsThetaMin, binsThetaMax);
-        protonsTheta = new TH1D("proton_theta", "Proton Theta (degrees)", binsThetaN, binsThetaMin, binsThetaMax);
-        neutronsTheta = new TH1D("neutron_theta", "Neutron Theta (degrees)", binsThetaN, binsThetaMin, binsThetaMax);
+        muonsZenith = new TH1D("muon_zenith", "Muon Zenith Angle (degrees)", binsZenithN, binsZenithMin, binsZenithMax);
+        electronsZenith = new TH1D("electron_zenith", "Electron Zenith Angle (degrees)", binsZenithN, binsZenithMin,
+                                   binsZenithMax);
+        gammasZenith = new TH1D("gamma_zenith", "Gamma Zenith Angle (degrees)", binsZenithN, binsZenithMin,
+                                binsZenithMax);
+        protonsZenith = new TH1D("proton_zenith", "Proton Zenith Angle (degrees)", binsZenithN, binsZenithMin,
+                                 binsZenithMax);
+        neutronsZenith = new TH1D("neutron_zenith", "Neutron Zenith Angle (degrees)", binsZenithN, binsZenithMin,
+                                  binsZenithMax);
 
-        muonsKeTheta = new TH2D("muon_energy_theta", "Muon Kinetic Energy (MeV) vs Theta (degrees)", binsEnergyN,
-                                binsEnergy,
-                                binsThetaN, binsThetaMin, binsThetaMax);
-        electronsKeTheta = new TH2D("electron_energy_theta", "Electron Kinetic Energy (MeV) vs Theta (degrees)",
-                                    binsEnergyN,
-                                    binsEnergy, binsThetaN, binsThetaMin, binsThetaMax);
-        gammasKeTheta = new TH2D("gamma_energy_theta", "Gamma Kinetic Energy (MeV) vs Theta (degrees)", binsEnergyN,
-                                 binsEnergy,
-                                 binsThetaN, binsThetaMin, binsThetaMax);
-        protonsKeTheta = new TH2D("proton_energy_theta", "Proton Kinetic Energy (MeV) vs Theta (degrees)", binsEnergyN,
-                                  binsEnergy, binsThetaN, binsThetaMin, binsThetaMax);
-        neutronsKeTheta = new TH2D("neutron_energy_theta", "Neutron Kinetic Energy (MeV) vs Theta (degrees)", binsEnergyN,
-                                   binsEnergy, binsThetaN, binsThetaMin, binsThetaMax);
+        muonsEnergyZenith = new TH2D("muon_energy_zenith", "Muon Kinetic Energy (MeV) vs Zenith Angle (degrees)",
+                                     binsEnergyN,
+                                     binsEnergy,
+                                     binsZenithN, binsZenithMin, binsZenithMax);
+        electronsEnergyZenith = new TH2D("electron_energy_zenith",
+                                         "Electron Kinetic Energy (MeV) vs Zenith Angle (degrees)",
+                                         binsEnergyN,
+                                         binsEnergy, binsZenithN, binsZenithMin, binsZenithMax);
+        gammasEnergyZenith = new TH2D("gamma_energy_zenith", "Gamma Kinetic Energy (MeV) vs Zenith Angle (degrees)",
+                                      binsEnergyN,
+                                      binsEnergy,
+                                      binsZenithN, binsZenithMin, binsZenithMax);
+        protonsEnergyZenith = new TH2D("proton_energy_zenith", "Proton Kinetic Energy (MeV) vs Zenith Angle (degrees)",
+                                       binsEnergyN,
+                                       binsEnergy, binsZenithN, binsZenithMin, binsZenithMax);
+        neutronsEnergyZenith = new TH2D("neutron_energy_zenith",
+                                        "Neutron Kinetic Energy (MeV) vs Zenith Angle (degrees)", binsEnergyN,
+                                        binsEnergy, binsZenithN, binsZenithMin, binsZenithMax);
     }
 }
 
@@ -109,13 +117,13 @@ void RunAction::EndOfRunAction(const G4Run *) {
 
     if (isMaster) {
         if (inputHistEnergy) {
-            inputHistEnergy->Write("inputKe");
+            inputHistEnergy->Write("inputEnergy");
         }
-        if (inputHistTheta) {
-            inputHistTheta->Write("inputTheta");
+        if (inputHistZenith) {
+            inputHistZenith->Write("inputZenith");
         }
-        if (inputHistEnergyTheta) {
-            inputHistEnergyTheta->Write("inputKeTheta");
+        if (inputHistEnergyZenith) {
+            inputHistEnergyZenith->Write("inputEnergyZenith");
         }
         inputFile->Close();
 
@@ -131,44 +139,44 @@ void RunAction::InsertTrack(const G4Track *track) {
     G4String particleName = particle->GetParticleName();
     // Energy in MeV
     G4double kineticEnergy = track->GetKineticEnergy() / MeV;
-    G4double theta =
+    G4double zenith =
             TMath::ACos(track->GetMomentumDirection().z()) * TMath::RadToDeg();
 
     if (particleName == "mu-") {
-        muonsKe->Fill(kineticEnergy);
-        muonsTheta->Fill(theta);
-        muonsKeTheta->Fill(kineticEnergy, theta);
+        muonsEnergy->Fill(kineticEnergy);
+        muonsZenith->Fill(zenith);
+        muonsEnergyZenith->Fill(kineticEnergy, zenith);
     } else if (particleName == "e-") {
-        electronsKe->Fill(kineticEnergy);
-        electronsTheta->Fill(theta);
-        electronsKeTheta->Fill(kineticEnergy, theta);
+        electronsEnergy->Fill(kineticEnergy);
+        electronsZenith->Fill(zenith);
+        electronsEnergyZenith->Fill(kineticEnergy, zenith);
     } else if (particleName == "gamma") {
-        gammasKe->Fill(kineticEnergy);
-        gammasTheta->Fill(theta);
-        gammasKeTheta->Fill(kineticEnergy, theta);
+        gammasEnergy->Fill(kineticEnergy);
+        gammasZenith->Fill(zenith);
+        gammasEnergyZenith->Fill(kineticEnergy, zenith);
     } else if (particleName == "proton") {
-        protonsKe->Fill(kineticEnergy);
-        protonsTheta->Fill(theta);
-        protonsKeTheta->Fill(kineticEnergy, theta);
+        protonsEnergy->Fill(kineticEnergy);
+        protonsZenith->Fill(zenith);
+        protonsEnergyZenith->Fill(kineticEnergy, zenith);
     } else if (particleName == "neutron") {
-        neutronsKe->Fill(kineticEnergy);
-        neutronsTheta->Fill(theta);
-        neutronsKeTheta->Fill(kineticEnergy, theta);
+        neutronsEnergy->Fill(kineticEnergy);
+        neutronsZenith->Fill(zenith);
+        neutronsEnergyZenith->Fill(kineticEnergy, zenith);
     }
 }
 
-std::pair<double, double> RunAction::GetEnergyAndTheta() {
+std::pair<double, double> RunAction::GetEnergyAndZenith() {
     lock_guard<std::mutex> lock(inputMutex);
 
-    if (!inputHistEnergy || !inputHistTheta || !inputHistEnergyTheta) {
-        throw runtime_error("RunAction::GetEnergyAndTheta: input histograms not set");
+    if (!inputHistEnergy || !inputHistZenith || !inputHistEnergyZenith) {
+        throw runtime_error("RunAction::GetEnergyAndZenith: input histograms not set");
     }
-    double energy, theta;
-    inputHistEnergyTheta->GetRandom2(energy, theta);
+    double energy, zenith;
+    inputHistEnergyZenith->GetRandom2(energy, zenith);
     // energy = inputHistEnergy->GetRandom();
-    // theta = inputHistTheta->GetRandom();
+    // zenith = inputHistZenith->GetRandom();
 
-    return {energy * MeV, theta};
+    return {energy * MeV, zenith};
 }
 
 std::string RunAction::GetInputParticleName() {

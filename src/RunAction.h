@@ -18,7 +18,7 @@ public:
 
     static void InsertTrack(const G4Track *track);
 
-    static std::pair<double, double> GetEnergyAndTheta();
+    static std::pair<double, double> GetEnergyAndZenith();
 
     static std::string GetInputParticleName();
 
@@ -51,26 +51,26 @@ private:
     static TFile *outputFile;
 
     static TH1D *inputHistEnergy;
-    static TH1D *inputHistTheta;
-    static TH2D *inputHistEnergyTheta;
+    static TH1D *inputHistZenith;
+    static TH2D *inputHistEnergyZenith;
 
-    static TH1D *muonsKe;
-    static TH1D *electronsKe;
-    static TH1D *gammasKe;
-    static TH1D *protonsKe;
-    static TH1D *neutronsKe;
+    static TH1D *muonsEnergy;
+    static TH1D *electronsEnergy;
+    static TH1D *gammasEnergy;
+    static TH1D *protonsEnergy;
+    static TH1D *neutronsEnergy;
 
-    static TH1D *muonsTheta;
-    static TH1D *electronsTheta;
-    static TH1D *gammasTheta;
-    static TH1D *protonsTheta;
-    static TH1D *neutronsTheta;
+    static TH1D *muonsZenith;
+    static TH1D *electronsZenith;
+    static TH1D *gammasZenith;
+    static TH1D *protonsZenith;
+    static TH1D *neutronsZenith;
 
-    static TH2D *muonsKeTheta;
-    static TH2D *electronsKeTheta;
-    static TH2D *gammasKeTheta;
-    static TH2D *protonsKeTheta;
-    static TH2D *neutronsKeTheta;
+    static TH2D *muonsEnergyZenith;
+    static TH2D *electronsEnergyZenith;
+    static TH2D *gammasEnergyZenith;
+    static TH2D *protonsEnergyZenith;
+    static TH2D *neutronsEnergyZenith;
 };
 
 
