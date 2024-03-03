@@ -10,6 +10,8 @@ mutex RunAction::inputMutex;
 mutex RunAction::outputMutex;
 
 string RunAction::inputParticleName;
+string RunAction::inputFilename;
+string RunAction::outputFilename;
 
 TFile *RunAction::inputFile = nullptr;
 TFile *RunAction::outputFile = nullptr;
@@ -42,9 +44,7 @@ void RunAction::BeginOfRunAction(const G4Run *) {
     lock_guard<std::mutex> lock(mutex);
 
     if (IsMaster()) {
-        inputFile = TFile::Open("input.root", "READ");
-
-        inputParticleName = "neutron";
+        inputFile = TFile::Open(inputFilename.c_str(), "READ");
 
         inputHistEnergy = inputFile->Get<TH1F>(string(inputParticleName + "sKe").c_str());
         inputHistTheta = inputFile->Get<TH1F>(string(inputParticleName + "sTheta").c_str());
@@ -55,7 +55,7 @@ void RunAction::BeginOfRunAction(const G4Run *) {
         inputHistTheta->SetName("inputTheta");
         inputHistEnergyTheta->SetName("inputKeTheta");
 
-        outputFile = TFile::Open("output.root", "RECREATE");
+        outputFile = TFile::Open(outputFilename.c_str(), "RECREATE");
 
         const unsigned int binsEnergyN = 200;
         const double binsEnergyMin = 1E-9;
@@ -164,7 +164,7 @@ std::pair<double, double> RunAction::GetEnergyAndTheta() {
     return {energy, theta};
 }
 
-std::string RunAction::GetInputParticleName() const {
+std::string RunAction::GetInputParticleName() {
     if (inputParticleName == "neutron") {
         return "neutron";
     } else if (inputParticleName == "proton") {
@@ -178,4 +178,16 @@ std::string RunAction::GetInputParticleName() const {
     } else {
         throw runtime_error("RunAction::GetInputParticleName: unknown input particle name: " + inputParticleName);
     }
+}
+
+void RunAction::SetInputParticle(const string &name) {
+    inputParticleName = name;
+}
+
+void RunAction::SetInputFilename(const string &name) {
+    inputFilename = name;
+}
+
+void RunAction::SetOutputFilename(const string &name) {
+    outputFilename = name;
 }

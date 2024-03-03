@@ -6,21 +6,36 @@
 #include "DetectorConstruction.h"
 #include "PhysicsList.h"
 #include "ActionInitialization.h"
+#include "RunAction.h"
 
 #include "CLI/CLI.hpp"
 
 using namespace std;
 
 int main(int argc, char **argv) {
-    int nEvents = 1000;
+
+    int nEvents;
     int nThreads = 0;
+    string inputFilename;
+    string outputFilename;
+    string inputParticle;
 
     CLI::App app{"radiation-transmission"};
 
-    app.add_option("-n,--primaries", nEvents, "Number of primary particles to launch")->check(CLI::PositiveNumber);
+    app.add_option("-n,--primaries", nEvents, "Number of primary particles to launch")->check(
+            CLI::PositiveNumber)->required();
     app.add_option("-t,--threads", nThreads, "Number of threads")->check(CLI::PositiveNumber);
+    app.add_option("-p,--particle", inputParticle, "Input particle type")->check(
+            CLI::IsMember({"neutron", "gamma", "proton", "electron", "muon"}))->required();
+    app.add_option("-i,--input", inputFilename,
+                   "Input root filename with particle energy / angle information")->required();
+    app.add_option("-o,--output", outputFilename, "Output root filename")->required();
 
     CLI11_PARSE(app, argc, argv);
+
+    RunAction::SetInputParticle(inputParticle);
+    RunAction::SetInputFilename(inputFilename);
+    RunAction::SetOutputFilename(outputFilename);
 
     const auto runManagerType = nThreads > 0 ? G4RunManagerType::MTOnly : G4RunManagerType::SerialOnly;
     auto runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));

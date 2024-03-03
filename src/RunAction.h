@@ -16,13 +16,22 @@ public:
 
     void EndOfRunAction(const G4Run *) override;
 
-    void InsertTrack(const G4Track *track);
+    static void InsertTrack(const G4Track *track);
 
-    std::pair<double, double> GetEnergyAndTheta();
+    static std::pair<double, double> GetEnergyAndTheta();
 
-    std::string GetInputParticleName() const;
+    static std::string GetInputParticleName();
+
+    static void SetInputParticle(const std::string &inputParticleName);
+
+    static void SetInputFilename(const std::string &inputFilename);
+
+    static void SetOutputFilename(const std::string &outputFilename);
 
 private:
+    static std::string inputFilename;
+    static std::string outputFilename;
+
     static std::mutex inputMutex;
     static std::mutex outputMutex;
 
