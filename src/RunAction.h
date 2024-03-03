@@ -23,8 +23,8 @@ public:
     std::string GetInputParticleName() const;
 
 private:
-    std::mutex inputMutex;
-    std::mutex outputMutex;
+    static std::mutex inputMutex;
+    static std::mutex outputMutex;
 
     static std::string inputParticleName;
     static TFile *inputFile;

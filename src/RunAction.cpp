@@ -6,6 +6,9 @@
 
 using namespace std;
 
+mutex RunAction::inputMutex;
+mutex RunAction::outputMutex;
+
 string RunAction::inputParticleName;
 
 TFile *RunAction::inputFile = nullptr;
@@ -113,8 +116,6 @@ void RunAction::EndOfRunAction(const G4Run *) {
         outputFile->Write();
         outputFile->Close();
     }
-
-    cout << "RunAction::EndOfRunAction" << endl;
 }
 
 void RunAction::InsertTrack(const G4Track *track) {
@@ -159,6 +160,7 @@ std::pair<double, double> RunAction::GetEnergyAndTheta() {
     // inputHistEnergyTheta->GetRandom2(energy, theta);
     energy = inputHistEnergy->GetRandom();
     theta = inputHistTheta->GetRandom();
+
     return {energy, theta};
 }
 
