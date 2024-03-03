@@ -5,6 +5,7 @@
 #include <TMath.h>
 
 using namespace std;
+using namespace CLHEP;
 
 int RunAction::requestedPrimaries = 0;
 unsigned int RunAction::launchedPrimaries = 0;
@@ -126,7 +127,8 @@ void RunAction::InsertTrack(const G4Track *track) {
 
     auto *particle = const_cast<G4ParticleDefinition *>(track->GetParticleDefinition());
     G4String particleName = particle->GetParticleName();
-    G4double kineticEnergy = track->GetKineticEnergy();
+    // Energy in MeV
+    G4double kineticEnergy = track->GetKineticEnergy() / MeV;
     G4double theta =
             TMath::ACos(track->GetMomentumDirection().z()) * TMath::RadToDeg();
 
@@ -160,11 +162,11 @@ std::pair<double, double> RunAction::GetEnergyAndTheta() {
         throw runtime_error("RunAction::GetEnergyAndTheta: input histograms not set");
     }
     double energy, theta;
-    // inputHistEnergyTheta->GetRandom2(energy, theta);
-    energy = inputHistEnergy->GetRandom();
-    theta = inputHistTheta->GetRandom();
+    inputHistEnergyTheta->GetRandom2(energy, theta);
+    // energy = inputHistEnergy->GetRandom();
+    // theta = inputHistTheta->GetRandom();
 
-    return {energy, theta};
+    return {energy * MeV, theta};
 }
 
 std::string RunAction::GetInputParticleName() {

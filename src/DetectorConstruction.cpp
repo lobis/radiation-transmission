@@ -22,13 +22,15 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
     const auto vacuum = nist->FindOrBuildMaterial("G4_Galactic");
 
     // check all the materials are valid
-    for (const auto &config: configuration) {
-        if (nist->FindOrBuildMaterial(config.first) == nullptr) {
-            throw runtime_error("Material " + config.first + " not found");
+    for (const auto &[material, thickness]: configuration) {
+        if (nist->FindOrBuildMaterial(material) == nullptr) {
+            throw runtime_error("Material " + material + " not found");
+        }
+        if (thickness <= 0) {
+            throw runtime_error("Thickness must be positive");
         }
     }
 
-    const auto targetMaterial = vacuum;
     constexpr double width = 100.0 * km; // infinite in x and y
 
     constexpr double detectorThickness = 1.0 * mm;
@@ -42,12 +44,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
         const auto &config = configuration[i];
         const auto material = nist->FindOrBuildMaterial(config.first);
         const auto thickness = config.second * mm;
-        totalThickness += thickness;
-
         auto solid = new G4Box("Layer" + to_string(i), width / 2, width / 2, thickness / 2);
         auto logical = new G4LogicalVolume(solid, material, "Layer" + to_string(i));
         new G4PVPlacement(nullptr, {0, 0, totalThickness + thickness / 2}, logical, "Layer" + to_string(i),
                           worldLogical, false, 0);
+        totalThickness += thickness;
     }
 
     auto detectorSolid = new G4Box("Detector", width / 2, width / 2, detectorThickness / 2);

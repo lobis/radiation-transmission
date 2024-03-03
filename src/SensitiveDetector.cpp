@@ -13,8 +13,7 @@ G4bool SensitiveDetector::ProcessHits(G4Step *step, G4TouchableHistory *) {
 
     auto track = step->GetTrack();
 
-    auto runAction = dynamic_cast<RunAction *>(const_cast<G4UserRunAction *>(G4RunManager::GetRunManager()->GetUserRunAction()));
-    runAction->InsertTrack(track);
+    RunAction::InsertTrack(track);
 
     track->SetTrackStatus(fStopAndKill);
 

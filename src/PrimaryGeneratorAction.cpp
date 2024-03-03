@@ -22,13 +22,15 @@ PrimaryGeneratorAction::PrimaryGeneratorAction() : G4VUserPrimaryGeneratorAction
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event *event) {
     const auto [energy, theta] = RunAction::GetEnergyAndTheta();
 
-    gun.SetParticleEnergy(energy * MeV);
+    gun.SetParticleEnergy(energy);
 
     double phi = G4UniformRand() * TMath::TwoPi();
     double thetaRad = theta * TMath::DegToRad();
 
-    gun.SetParticleMomentumDirection(
-            {TMath::Sin(thetaRad) * TMath::Cos(phi), TMath::Sin(thetaRad) * TMath::Sin(phi), TMath::Cos(thetaRad)});
+    const G4ThreeVector direction = {TMath::Sin(thetaRad) * TMath::Cos(phi), TMath::Sin(thetaRad) * TMath::Sin(phi),
+                                     TMath::Cos(thetaRad)};
+
+    gun.SetParticleMomentumDirection(direction);
 
     gun.GeneratePrimaryVertex(event);
 
