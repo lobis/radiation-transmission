@@ -33,7 +33,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 
     constexpr double width = 100.0 * km; // infinite in x and y
 
-    constexpr double detectorThickness = 1.0 * mm;
+    constexpr double detectorThickness = 1.0 * nm;
 
     auto worldSolid = new G4Box("World", width / 2, width / 2, width / 2);
     auto worldLogical = new G4LogicalVolume(worldSolid, vacuum, "World");
