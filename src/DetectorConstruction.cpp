@@ -12,35 +12,50 @@
 using namespace std;
 using namespace CLHEP;
 
-DetectorConstruction::DetectorConstruction() : G4VUserDetectorConstruction() {}
+DetectorConstruction::DetectorConstruction(const std::vector<std::pair<std::string, double>> &configuration)
+        : G4VUserDetectorConstruction(), configuration(configuration) {}
 
 
 G4VPhysicalVolume *DetectorConstruction::Construct() {
     // build a basic detector
     auto nist = G4NistManager::Instance();
     const auto vacuum = nist->FindOrBuildMaterial("G4_Galactic");
-    const auto concrete = nist->FindOrBuildMaterial("G4_CONCRETE");
+
+    // check all the materials are valid
+    for (const auto &config: configuration) {
+        if (nist->FindOrBuildMaterial(config.first) == nullptr) {
+            throw runtime_error("Material " + config.first + " not found");
+        }
+    }
 
     const auto targetMaterial = vacuum;
     constexpr double width = 100.0 * km; // infinite in x and y
 
-    constexpr double thickness = 10.0 * cm;
     constexpr double detectorThickness = 1.0 * mm;
 
     auto worldSolid = new G4Box("World", width / 2, width / 2, width / 2);
     auto worldLogical = new G4LogicalVolume(worldSolid, vacuum, "World");
     world = new G4PVPlacement(nullptr, {}, worldLogical, "World", nullptr, false, 0);
 
-    auto targetSolid = new G4Box("Target", width / 2, width / 2, thickness / 2);
-    auto targetLogical = new G4LogicalVolume(targetSolid, targetMaterial, "Target");
-    new G4PVPlacement(nullptr, {0, 0, thickness / 2}, targetLogical, "Target", worldLogical, false, 0);
+    double totalThickness = 0;
+    for (int i = 0; i < configuration.size(); i++) {
+        const auto &config = configuration[i];
+        const auto material = nist->FindOrBuildMaterial(config.first);
+        const auto thickness = config.second * mm;
+        totalThickness += thickness;
+
+        auto solid = new G4Box("Layer" + to_string(i), width / 2, width / 2, thickness / 2);
+        auto logical = new G4LogicalVolume(solid, material, "Layer" + to_string(i));
+        new G4PVPlacement(nullptr, {0, 0, totalThickness + thickness / 2}, logical, "Layer" + to_string(i),
+                          worldLogical, false, 0);
+    }
 
     auto detectorSolid = new G4Box("Detector", width / 2, width / 2, detectorThickness / 2);
     auto detectorLogical = new G4LogicalVolume(detectorSolid, vacuum, "Detector");
-    new G4PVPlacement(nullptr, {0, 0, thickness + detectorThickness / 2}, detectorLogical, "Detector",
+    new G4PVPlacement(nullptr, {0, 0, totalThickness + detectorThickness / 2}, detectorLogical, "Detector",
                       worldLogical, false, 0);
 
-    // check for overlaps
+    // check for overlaps (not sure if this actually works)
     if (world->CheckOverlaps(1000, 0, true)) {
         throw runtime_error("Overlaps found in geometry");
     }

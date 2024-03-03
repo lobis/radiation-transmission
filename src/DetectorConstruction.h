@@ -14,7 +14,7 @@
 class DetectorConstruction : public G4VUserDetectorConstruction {
 
 public:
-    DetectorConstruction();
+    DetectorConstruction(const std::vector<std::pair<std::string, double>> &configuration);
 
     G4VPhysicalVolume *Construct() override;
 
@@ -27,6 +27,8 @@ public:
 
 private:
     G4VPhysicalVolume *world = nullptr;
+
+    const std::vector<std::pair<std::string, double>> configuration;
 };
 
 

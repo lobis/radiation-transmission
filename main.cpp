@@ -19,6 +19,7 @@ int main(int argc, char **argv) {
     string inputFilename;
     string outputFilename;
     string inputParticle;
+    vector<pair<string, double>> detectorConfiguration;
 
     CLI::App app{"radiation-transmission"};
 
@@ -30,6 +31,9 @@ int main(int argc, char **argv) {
     app.add_option("-i,--input", inputFilename,
                    "Input root filename with particle energy / angle information")->required();
     app.add_option("-o,--output", outputFilename, "Output root filename")->required();
+
+    app.add_option("-d,--detector", detectorConfiguration,
+                   "Detector configuration: material and thickness (in mm) in the following format: '-d G4_Pb 100'. If called multiple times they will be stacked")->required();
 
     CLI11_PARSE(app, argc, argv);
 
@@ -44,7 +48,7 @@ int main(int argc, char **argv) {
         runManager->SetNumberOfThreads((G4int) nThreads);
     }
 
-    runManager->SetUserInitialization(new DetectorConstruction);
+    runManager->SetUserInitialization(new DetectorConstruction(detectorConfiguration));
     runManager->SetUserInitialization(new PhysicsList);
 
     runManager->SetUserInitialization(new ActionInitialization);
