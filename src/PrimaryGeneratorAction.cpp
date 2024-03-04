@@ -12,15 +12,17 @@ using namespace std;
 using namespace CLHEP;
 
 PrimaryGeneratorAction::PrimaryGeneratorAction() : G4VUserPrimaryGeneratorAction() {
-    G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
-    G4ParticleDefinition *particle = particleTable->FindParticle(RunAction::GetInputParticleName());
-
-    gun.SetParticleDefinition(particle);
     gun.SetParticlePosition({0.0, 0.0, 0.0});
 }
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event *event) {
-    const auto [energy, zenith] = RunAction::GetEnergyAndZenith();
+    const auto particleName = RunAction::ChooseParticle();
+
+    G4ParticleDefinition *particle = G4ParticleTable::GetParticleTable()->FindParticle(
+            RunAction::GetGeant4ParticleName(particleName));
+    gun.SetParticleDefinition(particle);
+
+    const auto [energy, zenith] = RunAction::GenerateEnergyAndZenith(particleName);
 
     gun.SetParticleEnergy(energy);
 

@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     int nThreads = 0;
     string inputFilename;
     string outputFilename;
-    string inputParticle;
+    set<string> inputParticleNames;
     vector<pair<string, double>> detectorConfiguration;
 
     CLI::App app{"radiation-transmission"};
@@ -42,18 +42,17 @@ int main(int argc, char **argv) {
             CLI::PositiveNumber)->required();
     app.add_option("-t,--threads", nThreads, "Number of threads. t=0 means no multithreading (default)")->check(
             CLI::NonNegativeNumber);
-    app.add_option("-p,--particle", inputParticle, "Input particle type")->check(
+    app.add_option("-p,--particle", inputParticleNames, "Input particle type")->check(
             CLI::IsMember({"neutron", "gamma", "proton", "electron", "muon"}))->required();
     app.add_option("-i,--input", inputFilename,
                    "Input root filename with particle energy / angle information")->required();
     app.add_option("-o,--output", outputFilename, "Output root filename")->required();
-
     app.add_option("-d,--detector", detectorConfiguration,
                    "Detector configuration: material and thickness (in mm) in the following format: '-d G4_Pb 100'. If called multiple times they will be stacked")->required();
 
-    CLI11_PARSE(app, argc, argv);
-
-    RunAction::SetInputParticle(inputParticle);
+    CLI11_PARSE(app, argc, argv)
+    
+    RunAction::SetInputParticles(inputParticleNames);
     RunAction::SetInputFilename(inputFilename);
     RunAction::SetOutputFilename(outputFilename);
 

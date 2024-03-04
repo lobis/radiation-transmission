@@ -18,11 +18,13 @@ public:
 
     static void InsertTrack(const G4Track *track);
 
-    static std::pair<double, double> GetEnergyAndZenith();
+    static std::pair<double, double> GenerateEnergyAndZenith(const std::string &particle);
 
-    static std::string GetInputParticleName();
+    static std::string ChooseParticle();
 
-    static void SetInputParticle(const std::string &inputParticleName);
+    static std::string GetGeant4ParticleName(const std::string &particleName); // electron -> e-, etc.
+
+    static void SetInputParticles(const std::set<std::string> &particleNames);
 
     static void SetInputFilename(const std::string &inputFilename);
 
@@ -46,13 +48,12 @@ private:
     static std::mutex inputMutex;
     static std::mutex outputMutex;
 
-    static std::string inputParticleName;
+    static std::set<std::string> inputParticleNames;
     static TFile *inputFile;
     static TFile *outputFile;
 
-    static TH1D *inputHistEnergy;
-    static TH1D *inputHistZenith;
-    static TH2D *inputHistEnergyZenith;
+    static std::map<std::string, std::tuple<TH2D *, TH1D *, TH1D *>> inputParticleHists;
+    static std::map<std::string, double> inputParticleWeights; // based on the counts in the input histograms
 
     static TH1D *muonsEnergy;
     static TH1D *electronsEnergy;

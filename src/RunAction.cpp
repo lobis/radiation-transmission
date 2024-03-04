@@ -13,16 +13,16 @@ unsigned int RunAction::launchedPrimaries = 0;
 mutex RunAction::inputMutex;
 mutex RunAction::outputMutex;
 
-string RunAction::inputParticleName;
+set<string> RunAction::inputParticleNames = {};
+map<string, double> RunAction::inputParticleWeights = {};
+
 string RunAction::inputFilename;
 string RunAction::outputFilename;
 
 TFile *RunAction::inputFile = nullptr;
 TFile *RunAction::outputFile = nullptr;
 
-TH1D *RunAction::inputHistEnergy = nullptr;
-TH1D *RunAction::inputHistZenith = nullptr;
-TH2D *RunAction::inputHistEnergyZenith = nullptr;
+map<string, tuple<TH2D *, TH1D *, TH1D *>> RunAction::inputParticleHists = {};
 
 TH1D *RunAction::muonsEnergy = nullptr;
 TH1D *RunAction::electronsEnergy = nullptr;
@@ -50,14 +50,31 @@ void RunAction::BeginOfRunAction(const G4Run *) {
     if (IsMaster()) {
         inputFile = TFile::Open(inputFilename.c_str(), "READ");
 
-        inputHistEnergy = inputFile->Get<TH1D>(string(inputParticleName + "_energy").c_str());
-        inputHistZenith = inputFile->Get<TH1D>(string(inputParticleName + "_zenith").c_str());
-        inputHistEnergyZenith = inputFile->Get<TH2D>(string(inputParticleName + "_energy_zenith").c_str());
+        for (const auto &particleName: inputParticleNames) {
+            inputParticleHists[particleName] = {
+                    inputFile->Get<TH2D>(string(particleName + "_energy_zenith").c_str()),
+                    inputFile->Get<TH1D>(string(particleName + "_energy").c_str()),
+                    inputFile->Get<TH1D>(string(particleName + "_zenith").c_str())
+            };
 
-        // rename to avoid name conflicts
-        inputHistEnergy->SetName("inputEnergy");
-        inputHistZenith->SetName("inputZenith");
-        inputHistEnergyZenith->SetName("inputEnergyZenith");
+            get<0>(inputParticleHists[particleName])->SetName(
+                    string("input_" + particleName + "_energy_zenith").c_str());
+            get<1>(inputParticleHists[particleName])->SetName(
+                    string("input_" + particleName + "_energy").c_str());
+            get<2>(inputParticleHists[particleName])->SetName(
+                    string("input_" + particleName + "_zenith").c_str());
+
+            inputParticleWeights[particleName] = get<0>(inputParticleHists[particleName])->GetEntries();
+        }
+
+        // normalize inputParticleWeights
+        double sum = 0;
+        for (const auto &entry: inputParticleWeights) {
+            sum += entry.second;
+        }
+        for (auto &entry: inputParticleWeights) {
+            entry.second /= sum;
+        }
 
         outputFile = TFile::Open(outputFilename.c_str(), "RECREATE");
 
@@ -116,15 +133,13 @@ void RunAction::EndOfRunAction(const G4Run *) {
     lock_guard<std::mutex> lockOutput(outputMutex);
 
     if (isMaster) {
-        if (inputHistEnergy) {
-            inputHistEnergy->Write("inputEnergy");
+        // write input hists
+        for (const auto &entry: inputParticleHists) {
+            get<1>(entry.second)->Write();
+            get<2>(entry.second)->Write();
+            get<0>(entry.second)->Write(); // write this last to keep consistent style
         }
-        if (inputHistZenith) {
-            inputHistZenith->Write("inputZenith");
-        }
-        if (inputHistEnergyZenith) {
-            inputHistEnergyZenith->Write("inputEnergyZenith");
-        }
+
         inputFile->Close();
 
         outputFile->Write();
@@ -165,38 +180,36 @@ void RunAction::InsertTrack(const G4Track *track) {
     }
 }
 
-std::pair<double, double> RunAction::GetEnergyAndZenith() {
+std::pair<double, double> RunAction::GenerateEnergyAndZenith(const string &particle) {
+    double energy, zenith;
+
+    const auto hist = get<0>(inputParticleHists[particle]);
+
     lock_guard<std::mutex> lock(inputMutex);
 
-    if (!inputHistEnergy || !inputHistZenith || !inputHistEnergyZenith) {
-        throw runtime_error("RunAction::GetEnergyAndZenith: input histograms not set");
-    }
-    double energy, zenith;
-    inputHistEnergyZenith->GetRandom2(energy, zenith);
-    // energy = inputHistEnergy->GetRandom();
-    // zenith = inputHistZenith->GetRandom();
+    hist->GetRandom2(energy, zenith);
 
     return {energy * MeV, zenith};
 }
 
-std::string RunAction::GetInputParticleName() {
-    if (inputParticleName == "neutron") {
+std::string RunAction::GetGeant4ParticleName(const std::string &particleName) {
+    if (particleName == "neutron") {
         return "neutron";
-    } else if (inputParticleName == "proton") {
+    } else if (particleName == "proton") {
         return "proton";
-    } else if (inputParticleName == "muon") {
+    } else if (particleName == "muon") {
         return "mu-";
-    } else if (inputParticleName == "electron") {
+    } else if (particleName == "electron") {
         return "e-";
-    } else if (inputParticleName == "gamma") {
+    } else if (particleName == "gamma") {
         return "gamma";
     } else {
-        throw runtime_error("RunAction::GetInputParticleName: unknown input particle name: " + inputParticleName);
+        throw runtime_error("RunAction::GetInputParticleName: unknown input particle name: " + particleName);
     }
 }
 
-void RunAction::SetInputParticle(const string &name) {
-    inputParticleName = name;
+void RunAction::SetInputParticles(const std::set<std::string> &particleNames) {
+    inputParticleNames = particleNames;
 }
 
 void RunAction::SetInputFilename(const string &name) {
@@ -222,4 +235,24 @@ void RunAction::IncreaseLaunchedPrimaries() {
 unsigned int RunAction::GetLaunchedPrimaries() {
     lock_guard<std::mutex> lock(inputMutex);
     return RunAction::launchedPrimaries;
+}
+
+std::string RunAction::ChooseParticle() {
+    lock_guard<std::mutex> lock(inputMutex);
+
+    if (inputParticleNames.size() == 1) {
+        return *inputParticleNames.begin();
+    } else {
+        const auto random = G4UniformRand();
+        // choose a random particle based on the weights
+        double sum = 0;
+        for (const auto &entry: inputParticleWeights) {
+            sum += entry.second;
+            if (random < sum) {
+                return entry.first;
+            }
+        }
+    }
+
+    throw runtime_error("RunAction::ChooseParticle: could not choose a particle");
 }
