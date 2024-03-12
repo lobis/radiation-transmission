@@ -8,7 +8,9 @@ using namespace std;
 using namespace CLHEP;
 
 int RunAction::requestedPrimaries = 0;
+int RunAction::requestedSecondaries = 0;
 unsigned int RunAction::launchedPrimaries = 0;
+unsigned long long RunAction::secondariesCount = 0;
 
 mutex RunAction::inputMutex;
 mutex RunAction::outputMutex;
@@ -157,11 +159,12 @@ void RunAction::InsertTrack(const G4Track *track) {
     G4double zenith =
             TMath::ACos(track->GetMomentumDirection().z()) * TMath::RadToDeg();
 
-    if (particleName == "mu-") {
+    // TODO: split mu- and e-
+    if (particleName == "mu-" && particleName == "mu+") {
         muonsEnergy->Fill(kineticEnergy);
         muonsZenith->Fill(zenith);
         muonsEnergyZenith->Fill(kineticEnergy, zenith);
-    } else if (particleName == "e-") {
+    } else if (particleName == "e-" || particleName == "e+") {
         electronsEnergy->Fill(kineticEnergy);
         electronsZenith->Fill(zenith);
         electronsEnergyZenith->Fill(kineticEnergy, zenith);
@@ -177,6 +180,13 @@ void RunAction::InsertTrack(const G4Track *track) {
         neutronsEnergy->Fill(kineticEnergy);
         neutronsZenith->Fill(zenith);
         neutronsEnergyZenith->Fill(kineticEnergy, zenith);
+    } else {
+        return;
+    }
+
+    secondariesCount += 1;
+    if (requestedSecondaries > 0 && secondariesCount >= requestedSecondaries) {
+        G4RunManager::GetRunManager()->AbortRun(true);
     }
 }
 
@@ -224,8 +234,21 @@ void RunAction::SetRequestedPrimaries(int newValue) {
     RunAction::requestedPrimaries = newValue;
 }
 
+void RunAction::SetRequestedSecondaries(int newValue) {
+    RunAction::requestedSecondaries = newValue;
+}
+
 int RunAction::GetRequestedPrimaries() {
     return RunAction::requestedPrimaries;
+}
+
+int RunAction::GetRequestedSecondaries() {
+    return RunAction::requestedSecondaries;
+}
+
+unsigned long long RunAction::GetSecondariesCount() {
+    lock_guard<std::mutex> lock(outputMutex);
+    return RunAction::secondariesCount;
 }
 
 void RunAction::IncreaseLaunchedPrimaries() {

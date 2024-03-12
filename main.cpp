@@ -17,19 +17,42 @@ using namespace std;
 
 void printProgress() {
     const auto start = chrono::steady_clock::now();
+    // lambda to check if the condition has been met (RunAction::GetLaunchedPrimaries() < RunAction::GetRequestedPrimaries()) or (RunAction::GetSecondariesCount() < RunAction::GetRequestedSecondaries())
+
+    auto checkCondition = []() {
+        if (RunAction::GetRequestedPrimaries() > 0) {
+            return RunAction::GetLaunchedPrimaries() < RunAction::GetRequestedPrimaries();
+        } else {
+            return RunAction::GetSecondariesCount() < RunAction::GetRequestedSecondaries();
+        }
+    };
+
+    cout << "Requested primaries: " << RunAction::GetRequestedPrimaries() << endl;
+    cout << "Requested secondaries: " << RunAction::GetRequestedSecondaries() << endl;
+
     do {
         const auto elapsed = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - start).count();
-        cout << "Progress: " << RunAction::GetLaunchedPrimaries() << " / " << RunAction::GetRequestedPrimaries()
-             << " (" << 100.0 * RunAction::GetLaunchedPrimaries() / RunAction::GetRequestedPrimaries() << "%)"
-             << " Elapsed time: " << elapsed << " s" << endl;
+        if (RunAction::GetRequestedPrimaries() > 0) {
+            const auto count = RunAction::GetLaunchedPrimaries();
+            cout << "Progress (primaries): " << count << " / " << RunAction::GetRequestedPrimaries()
+                 << " (" << 100.0 * double(count) / RunAction::GetRequestedPrimaries() << "%)"
+                 << " Elapsed time: " << elapsed << " s" << endl;
+        } else {
+            const auto count = RunAction::GetSecondariesCount();
+            cout << "Progress (secondaries): " << count << " / " << RunAction::GetRequestedSecondaries()
+                 << " (" << 100.0 * double(count) / RunAction::GetRequestedSecondaries() << "%)"
+                 << " Elapsed time: " << elapsed << " s" << endl;
+        }
+
         std::this_thread::sleep_for(std::chrono::seconds(1));
-    } while (RunAction::GetLaunchedPrimaries() < RunAction::GetRequestedPrimaries());
+    } while (checkCondition());
 }
 
 int main(int argc, char **argv) {
     const auto timeStart = chrono::steady_clock::now();
 
-    int nEvents;
+    int nEvents = 0;
+    int nSecondariesLimit = 0;
     int nThreads = 0;
     string inputFilename;
     string outputFilename;
@@ -39,7 +62,9 @@ int main(int argc, char **argv) {
     CLI::App app{"radiation-transmission"};
 
     app.add_option("-n,--primaries", nEvents, "Number of primary particles to launch")->check(
-            CLI::PositiveNumber)->required();
+            CLI::PositiveNumber);
+    app.add_option("-s,--secondaries", nSecondariesLimit, "Number of secondaries to limit the simulation to")->check(
+            CLI::PositiveNumber);
     app.add_option("-t,--threads", nThreads, "Number of threads. t=0 means no multithreading (default)")->check(
             CLI::NonNegativeNumber);
     app.add_option("-p,--particle", inputParticleNames, "Input particle type")->check(
@@ -50,13 +75,20 @@ int main(int argc, char **argv) {
     app.add_option("-d,--detector", detectorConfiguration,
                    "Detector configuration: material and thickness (in mm) in the following format: '-d G4_Pb 100'. If called multiple times they will be stacked")->required();
 
+    // primaries or secondaries must be defined, but not both
+
     CLI11_PARSE(app, argc, argv)
-    
+
+    if ((nEvents == 0 && nSecondariesLimit == 0) || (nEvents > 0 && nSecondariesLimit > 0)) {
+        throw runtime_error("Either primaries or secondaries must be defined, but not both");
+    }
+
     RunAction::SetInputParticles(inputParticleNames);
     RunAction::SetInputFilename(inputFilename);
     RunAction::SetOutputFilename(outputFilename);
 
     RunAction::SetRequestedPrimaries(nEvents);
+    RunAction::SetRequestedSecondaries(nSecondariesLimit);
 
     if (!filesystem::exists(inputFilename)) {
         cerr << "Input file " << inputFilename << " does not exist" << endl;
@@ -80,7 +112,12 @@ int main(int argc, char **argv) {
     std::thread t(printProgress);
     t.detach();
 
-    runManager->BeamOn(RunAction::GetRequestedPrimaries());
+    cout << "nEvents: " << nEvents << endl;
+    if (nEvents > 0) {
+        runManager->BeamOn(nEvents);
+    } else {
+        runManager->BeamOn(numeric_limits<int>::max());
+    }
 
     const auto elapsed = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - timeStart).count();
 

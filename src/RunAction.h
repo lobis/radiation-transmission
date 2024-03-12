@@ -30,17 +30,26 @@ public:
 
     static void SetOutputFilename(const std::string &outputFilename);
 
-    static void SetRequestedPrimaries(int requestedPrimaries);
+    static void SetRequestedPrimaries(int);
 
     static int GetRequestedPrimaries();
+
+    static void SetRequestedSecondaries(int);
+
+    static int GetRequestedSecondaries();
 
     static void IncreaseLaunchedPrimaries();
 
     static unsigned int GetLaunchedPrimaries();
 
+    static unsigned long long GetSecondariesCount();
+
 private:
     static int requestedPrimaries;
+    static int requestedSecondaries;
+
     static unsigned int launchedPrimaries;
+    static unsigned long long secondariesCount;
 
     static std::string inputFilename;
     static std::string outputFilename;
