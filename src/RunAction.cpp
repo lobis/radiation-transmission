@@ -44,10 +44,6 @@ TH2D *RunAction::gammasEnergyZenith = nullptr;
 TH2D *RunAction::protonsEnergyZenith = nullptr;
 TH2D *RunAction::neutronsEnergyZenith = nullptr;
 
-TNamed latitudeMetadata;
-TNamed secondariesPerSecondPerSquareMeterMetadata;
-TNamed secondariesCountMetadata;
-
 RunAction::RunAction() : G4UserRunAction() {}
 
 void RunAction::BeginOfRunAction(const G4Run *) {
@@ -71,28 +67,6 @@ void RunAction::BeginOfRunAction(const G4Run *) {
                     string("input_" + particleName + "_zenith").c_str());
 
             inputParticleWeights[particleName] = get<0>(inputParticleHists[particleName])->GetEntries();
-
-
-            // metadata
-
-            const auto countPerSecondPerSquareMeterInput = inputFile->Get<TNamed>(
-                    "secondaries_per_second_per_square_meter");
-            // parse into double
-            const auto countPerSecondPerSquareMeterInputDouble = stod(countPerSecondPerSquareMeterInput->GetTitle());
-            const auto countPerSecondPerSquareMeterOutputDouble =
-                    countPerSecondPerSquareMeterInputDouble * (double) GetSecondariesCount() /
-                    (double) GetLaunchedPrimaries();
-            TNamed countPerSecondPerSquareMeterNamedOutput("secondaries_per_second_per_square_meter",
-                                                           Form("%.6E", countPerSecondPerSquareMeterOutputDouble));
-            secondariesPerSecondPerSquareMeterMetadata = countPerSecondPerSquareMeterNamedOutput;
-            // countPerSecondPerSquareMeterNamedOutput.Write();
-
-            TNamed secondariesCountString("secondaries_count", Form("%llu", GetSecondariesCount()));
-            // secondariesCountString.Write();
-            secondariesCountMetadata = secondariesCountString;
-
-            auto latitude = inputFile->Get<TNamed>("latitude");
-            latitudeMetadata = *latitude;
         }
 
         // normalize inputParticleWeights
@@ -157,17 +131,28 @@ void RunAction::BeginOfRunAction(const G4Run *) {
 }
 
 void RunAction::EndOfRunAction(const G4Run *) {
-    lock_guard<std::mutex> lockInput(inputMutex);
-    lock_guard<std::mutex> lockOutput(outputMutex);
-
     if (isMaster) {
+        lock_guard<std::mutex> lockInput(inputMutex);
+        lock_guard<std::mutex> lockOutput(outputMutex);
 
         // write metadata
-        secondariesPerSecondPerSquareMeterMetadata.SetTitle(
-                Form("%.6E", secondariesPerSecondPerSquareMeterMetadata.GetTitle()));
-        secondariesPerSecondPerSquareMeterMetadata.Write();
-        secondariesCountMetadata.Write();
-        latitudeMetadata.Write();
+        const auto countPerSecondPerSquareMeterInput = inputFile->Get<TNamed>(
+                "secondaries_per_second_per_square_meter");
+        // parse into double
+        const auto countPerSecondPerSquareMeterInputDouble = stod(countPerSecondPerSquareMeterInput->GetTitle());
+        const auto countPerSecondPerSquareMeterOutputDouble =
+                countPerSecondPerSquareMeterInputDouble * (double) secondariesCount /
+                (double) launchedPrimaries;
+
+        TNamed secondariesPerSecondPerSquareMeterNamed("secondaries_per_second_per_square_meter",
+                                                       Form("%.6E", countPerSecondPerSquareMeterOutputDouble));
+        secondariesPerSecondPerSquareMeterNamed.Write();
+
+        TNamed secondariesCountNamed("secondaries_count", to_string(secondariesCount).c_str());
+        secondariesCountNamed.Write();
+
+        auto latitudeNamed = inputFile->Get<TNamed>("latitude");
+        latitudeNamed->Write();
 
         // write input hists
         for (const auto &entry: inputParticleHists) {
