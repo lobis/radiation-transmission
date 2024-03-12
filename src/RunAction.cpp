@@ -179,7 +179,7 @@ void RunAction::InsertTrack(const G4Track *track) {
             TMath::ACos(track->GetMomentumDirection().z()) * TMath::RadToDeg();
 
     // TODO: split mu- and e-
-    if (particleName == "mu-" && particleName == "mu+") {
+    if (particleName == "mu-" || particleName == "mu+") {
         muonsEnergy->Fill(kineticEnergy);
         muonsZenith->Fill(zenith);
         muonsEnergyZenith->Fill(kineticEnergy, zenith);
