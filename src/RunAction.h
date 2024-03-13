@@ -44,6 +44,10 @@ public:
 
     static unsigned long long GetSecondariesCount();
 
+    static std::set<std::string> GetInputParticlesAllowed() {
+        return inputParticleNamesAllowed;
+    }
+
 private:
     static int requestedPrimaries;
     static int requestedSecondaries;
@@ -63,6 +67,8 @@ private:
 
     static std::map<std::string, std::tuple<TH2D *, TH1D *, TH1D *>> inputParticleHists;
     static std::map<std::string, double> inputParticleWeights; // based on the counts in the input histograms
+    static double secondariesTotalWeight; // used to scale the computed secondaries rate. Takes value 1.0 if all input particles are used as primaries, less if some are omitted.
+    static std::set<std::string> inputParticleNamesAllowed;
 
     static TH1D *muonsEnergy;
     static TH1D *electronsEnergy;

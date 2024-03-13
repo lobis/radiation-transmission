@@ -17,6 +17,8 @@ mutex RunAction::outputMutex;
 
 set<string> RunAction::inputParticleNames = {};
 map<string, double> RunAction::inputParticleWeights = {};
+double RunAction::secondariesTotalWeight;
+set<string> RunAction::inputParticleNamesAllowed = {"neutron", "gamma", "proton", "electron", "muon"};
 
 string RunAction::inputFilename;
 string RunAction::outputFilename;
@@ -52,7 +54,7 @@ void RunAction::BeginOfRunAction(const G4Run *) {
     if (IsMaster()) {
         inputFile = TFile::Open(inputFilename.c_str(), "READ");
 
-        for (const auto &particleName: inputParticleNames) {
+        for (const auto &particleName: inputParticleNamesAllowed) {
             inputParticleHists[particleName] = {
                     inputFile->Get<TH2D>(string(particleName + "_energy_zenith").c_str()),
                     inputFile->Get<TH1D>(string(particleName + "_energy").c_str()),
@@ -70,13 +72,25 @@ void RunAction::BeginOfRunAction(const G4Run *) {
         }
 
         // normalize inputParticleWeights
-        double sum = 0;
-        for (const auto &entry: inputParticleWeights) {
-            sum += entry.second;
+        double sumTotal = 0;
+        double sumPartial = 0;
+        for (const auto &particleName: inputParticleNamesAllowed) {
+            const auto weight = inputParticleWeights[particleName];
+            sumTotal += weight;
+            if (inputParticleNames.find(particleName) != inputParticleNames.end()) {
+                sumPartial += weight;
+            }
         }
+        secondariesTotalWeight = sumPartial / sumTotal;
         for (auto &entry: inputParticleWeights) {
-            entry.second /= sum;
+            entry.second /= sumPartial;
         }
+
+        cout << "Particle weights:" << endl;
+        for (const auto &particleName: inputParticleNames) {
+            cout << "    - " << particleName << " relative weight: " << inputParticleWeights[particleName] << endl;
+        }
+        cout << "Total weight: " << secondariesTotalWeight << endl;
 
         outputFile = TFile::Open(outputFilename.c_str(), "RECREATE");
 
@@ -142,7 +156,7 @@ void RunAction::EndOfRunAction(const G4Run *) {
         const auto countPerSecondPerSquareMeterInputDouble = stod(countPerSecondPerSquareMeterInput->GetTitle());
         const auto countPerSecondPerSquareMeterOutputDouble =
                 countPerSecondPerSquareMeterInputDouble * (double) secondariesCount /
-                (double) launchedPrimaries;
+                (double) launchedPrimaries * secondariesTotalWeight;
 
         TNamed secondariesPerSecondPerSquareMeterNamed("secondaries_per_second_per_square_meter",
                                                        Form("%.6E", countPerSecondPerSquareMeterOutputDouble));
@@ -290,7 +304,7 @@ std::string RunAction::ChooseParticle() {
         double sum = 0;
         for (const auto &entry: inputParticleWeights) {
             sum += entry.second;
-            if (random < sum) {
+            if (random <= sum) {
                 return entry.first;
             }
         }
