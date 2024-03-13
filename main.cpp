@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
     int nThreads = 0;
     string inputFilename;
     string outputFilename;
-    set<string> inputParticleNames;
+    set<string> inputParticleNames = RunAction::GetInputParticlesAllowed();
     vector<pair<string, double>> detectorConfiguration;
 
     CLI::App app{"radiation-transmission"};
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
     app.add_option("-t,--threads", nThreads, "Number of threads. t=0 means no multithreading (default)")->check(
             CLI::NonNegativeNumber);
     app.add_option("-p,--particle", inputParticleNames, "Input particle type")->check(
-            CLI::IsMember(RunAction::GetInputParticlesAllowed()))->required();
+            CLI::IsMember(RunAction::GetInputParticlesAllowed()));
     app.add_option("-i,--input", inputFilename,
                    "Input root filename with particle energy / angle information")->required();
     app.add_option("-o,--output", outputFilename, "Output root filename")->required();
