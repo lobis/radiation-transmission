@@ -38,11 +38,11 @@ public:
 
     static int GetRequestedSecondaries();
 
-    static void IncreaseLaunchedPrimaries();
+    static void IncreaseLaunchedPrimaries(const std::string &);
 
-    static unsigned int GetLaunchedPrimaries();
+    static unsigned int GetLaunchedPrimaries(bool lock = true);
 
-    static unsigned long long GetSecondariesCount();
+    static unsigned long long GetSecondariesCount(bool lock = true);
 
     static std::set<std::string> GetInputParticlesAllowed() {
         return inputParticleNamesAllowed;
@@ -52,8 +52,7 @@ private:
     static int requestedPrimaries;
     static int requestedSecondaries;
 
-    static unsigned int launchedPrimaries;
-    static unsigned long long secondariesCount;
+    static std::map<std::string, double> launchedPrimariesMap;
 
     static std::string inputFilename;
     static std::string outputFilename;
@@ -67,7 +66,6 @@ private:
 
     static std::map<std::string, std::tuple<TH2D *, TH1D *, TH1D *>> inputParticleHists;
     static std::map<std::string, double> inputParticleWeights; // based on the counts in the input histograms
-    static double secondariesTotalWeight; // used to scale the computed secondaries rate. Takes value 1.0 if all input particles are used as primaries, less if some are omitted.
     static std::set<std::string> inputParticleNamesAllowed;
 
     static TH1D *muonsEnergy;

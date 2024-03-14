@@ -36,5 +36,5 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event *event) {
 
     gun.GeneratePrimaryVertex(event);
 
-    RunAction::IncreaseLaunchedPrimaries();
+    RunAction::IncreaseLaunchedPrimaries(particleName);
 }
