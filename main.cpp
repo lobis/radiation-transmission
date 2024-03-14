@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
     int nEvents = 0;
     int nSecondariesLimit = 0;
     int nThreads = 0;
-    string inputFilename;
+    string inputFilename = "https://raw.githubusercontent.com/lobis/radiation-transmission/main/distributions/cry.root";
     string outputFilename;
     set<string> inputParticleNames = RunAction::GetInputParticlesAllowed();
     vector<pair<string, double>> detectorConfiguration;
@@ -90,7 +90,10 @@ int main(int argc, char **argv) {
     RunAction::SetRequestedPrimaries(nEvents);
     RunAction::SetRequestedSecondaries(nSecondariesLimit);
 
-    if (!filesystem::exists(inputFilename)) {
+    // check if file starts with "http" (first characters)
+    if (inputFilename.compare(0, 4, "http") == 0) {
+        // http file
+    } else if (!filesystem::exists(inputFilename)) {
         cerr << "Input file " << inputFilename << " does not exist" << endl;
         return 1;
     }
