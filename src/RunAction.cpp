@@ -157,6 +157,11 @@ void RunAction::EndOfRunAction(const G4Run *) {
         const auto countPerSecondPerSquareMeterOutputDouble =
                 countPerSecondPerSquareMeterInputDouble * (double) secondariesCount /
                 (double) launchedPrimaries * secondariesTotalWeight;
+        cout << "Secondaries count per second per square meter (flux): " << countPerSecondPerSquareMeterOutputDouble
+             << endl;
+        for (const auto &[particle, weight]: inputParticleWeights) {
+            cout << "    - " << particle << " flux: " << weight * countPerSecondPerSquareMeterOutputDouble << endl;
+        }
 
         TNamed secondariesPerSecondPerSquareMeterNamed("secondaries_per_second_per_square_meter",
                                                        Form("%.6E", countPerSecondPerSquareMeterOutputDouble));
