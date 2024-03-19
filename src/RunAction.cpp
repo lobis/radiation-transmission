@@ -306,7 +306,7 @@ std::pair<double, double> RunAction::GenerateEnergyAndZenith(const string &parti
 
     hist->GetRandom2(energy, zenith);
 
-    return {energy * MeV, zenith};
+    return {energy, zenith};
 }
 
 std::string RunAction::GetGeant4ParticleName(const std::string &particleName) {
